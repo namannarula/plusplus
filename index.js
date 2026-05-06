@@ -102,9 +102,9 @@ app.message(karmaPattern, async ({ message, say, client }) => {
 
     if (op === '++') {
       const response = karmaResponses[Math.floor(Math.random() * karmaResponses.length)];
-      lines.push(`<@${userInfo.id}> ${response} (now at ${newScore})`);
+      lines.push(`${response} (<@${userInfo.id}> now at ${newScore})`);
     } else {
-      lines.push(`<@${userInfo.id}> ouch! (now at ${newScore})`);
+      lines.push(`ouch! (<@${userInfo.id}> now at ${newScore})`);
     }
   }
 

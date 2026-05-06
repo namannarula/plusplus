@@ -1,5 +1,9 @@
 # plusplus
 
+A Slack bot for teams that'd rather `++` than say thanks.
+
+Give someone a `++` when they help you out. The bot keeps score and there's a leaderboard.
+
 I spent two years at FamPay. We had this thing — "don't say thanks, give ++".
 
 That's it. Someone helps you out, you give them a `++`. It just became how we said thanks. After a while you stop thinking about it, your hands just type `++` before your brain can write "thank you".

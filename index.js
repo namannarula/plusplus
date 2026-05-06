@@ -107,7 +107,7 @@ app.message(karmaPattern, async ({ message, say, client }) => {
       const permalink = await client.chat.getPermalink({ channel: message.channel, message_ts: message.ts });
       await client.chat.postMessage({
         channel: '#plusplus',
-        text: `<@${userInfo.id}> got a ++ from <@${message.user}> — <${permalink.permalink}|see message>`,
+        text: `<@${userInfo.id}> got a <${permalink.permalink}|++> from <@${message.user}>`,
       });
     } else {
       lines.push(`ouch! (<@${userInfo.id}> now at ${newScore})`);

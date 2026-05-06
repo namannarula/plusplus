@@ -103,6 +103,12 @@ app.message(karmaPattern, async ({ message, say, client }) => {
     if (op === '++') {
       const response = karmaResponses[Math.floor(Math.random() * karmaResponses.length)];
       lines.push(`${response} (<@${userInfo.id}> now at ${newScore})`);
+
+      const permalink = await client.chat.getPermalink({ channel: message.channel, message_ts: message.ts });
+      await client.chat.postMessage({
+        channel: '#plusplus',
+        text: `<@${userInfo.id}> got a ++ from <@${message.user}> — <${permalink.permalink}|see message>`,
+      });
     } else {
       lines.push(`ouch! (<@${userInfo.id}> now at ${newScore})`);
     }

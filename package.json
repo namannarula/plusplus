@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@slack/bolt": "^4.1.0",
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "node-cron": "^4.2.1",
+    "openai": "^6.36.0"
   },
   "engines": {
     "node": ">=18"

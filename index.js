@@ -1,7 +1,14 @@
 const { App } = require('@slack/bolt');
 const { createClient } = require('@supabase/supabase-js');
+const OpenAI = require('openai');
+const cron = require('node-cron');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+const nvidiaClient = new OpenAI({
+  baseURL: process.env.NVIDIA_BASE_URL,
+  apiKey: process.env.NVIDIA_API_KEY,
+});
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -236,6 +243,68 @@ app.event('message', async ({ event, client }) => {
       channel: event.channel,
       text: "I don't do DMs. Talk to me in a channel!",
     });
+  }
+});
+
+// --- Haiku generation ---
+
+async function generateHaiku() {
+  const stream = await nvidiaClient.chat.completions.create({
+    model: 'z-ai/glm4.7',
+    messages: [
+      {
+        role: 'user',
+        content:
+          'Write a haiku about vibe coding. Output only the three lines of the haiku, nothing else — no title, no explanation, no punctuation beyond the haiku itself.',
+      },
+    ],
+    temperature: 1,
+    top_p: 1,
+    max_tokens: 16384,
+    extra_body: { chat_template_kwargs: { enable_thinking: false, clear_thinking: false } },
+    stream: true,
+  });
+
+  let haiku = '';
+  for await (const chunk of stream) {
+    haiku += chunk.choices[0]?.delta?.content || '';
+  }
+  return haiku.trim();
+}
+
+// --- /vibe-haiku slash command ---
+
+app.command('/vibe-haiku', async ({ ack, respond }) => {
+  await ack();
+  try {
+    const haiku = await generateHaiku();
+    if (!haiku) {
+      await respond({ text: 'Sorry, could not generate a haiku right now.', response_type: 'in_channel' });
+      return;
+    }
+    await respond({ text: haiku, response_type: 'in_channel' });
+  } catch (err) {
+    console.error('/vibe-haiku: failed to generate haiku:', err);
+    await respond({ text: 'Sorry, something went wrong generating the haiku.', response_type: 'in_channel' });
+  }
+});
+
+// --- Haiku cron (9 AM IST = 03:30 UTC) ---
+
+// Runs daily at 9:00 AM IST (UTC+5:30 = 03:30 UTC)
+cron.schedule('30 3 * * *', async () => {
+  try {
+    const haiku = await generateHaiku();
+    if (!haiku) {
+      console.warn('Haiku cron: no content received from NVIDIA API');
+      return;
+    }
+    await app.client.chat.postMessage({
+      channel: '#social',
+      text: haiku,
+    });
+  } catch (err) {
+    console.error('Haiku cron: failed to generate or post haiku to #social:', err);
   }
 });
 
